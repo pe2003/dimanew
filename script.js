@@ -271,13 +271,7 @@ function vote(targetRole, voteType) {
             return;
         }
 
-        const cachedVotes = JSON.parse(localStorage.getItem(`votes_${currentUser.id}`) || '[]');
-        const existingVote = cachedVotes.some(v => v.vote.to === (existingUser?.id || targetUser.id) && v.vote.type === voteType);
-        if (existingVote) {
-            alert('Вы уже голосовали за этого человека этим символом!');
-            return;
-        }
-
+        // Определяем targetUser до использования
         const targetUser = existingUser || {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
             role: targetRole,
@@ -291,6 +285,14 @@ function vote(targetRole, voteType) {
             hasVotedWaiterPig: false,
             registered: false
         };
+
+        // Теперь используем targetUser после его объявления
+        const cachedVotes = JSON.parse(localStorage.getItem(`votes_${currentUser.id}`) || '[]');
+        const existingVote = cachedVotes.some(v => v.vote.to === targetUser.id && v.vote.type === voteType);
+        if (existingVote) {
+            alert('Вы уже голосовали за этого человека этим символом!');
+            return;
+        }
 
         if (!existingUser) {
             allUsers.push(targetUser);
@@ -309,7 +311,7 @@ function vote(targetRole, voteType) {
 
         currentUser[voteKey] = true;
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        updateUserCache(currentUser); // Обновляем пользователя в allUsers
+        updateUserCache(currentUser);
 
         if (targetRole === 'cook') {
             if (voteType === 'star') cookStarVoted = true;
@@ -330,7 +332,6 @@ function vote(targetRole, voteType) {
         alert("Произошла ошибка: " + error.message);
     }
 }
-
 function updateMyVotes() {
     const cachedVotes = JSON.parse(localStorage.getItem(`votes_${currentUser.id}`) || '[]');
     if (cachedVotes.length > 0) {
